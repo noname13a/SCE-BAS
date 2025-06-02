@@ -1,0 +1,7 @@
+url = 'YOUR_CALDERA_ADDRESS_HERE'
+
+auth = {'Cookie':'API_SESSION="YOUR_API_SESSION_KEY_HERE"'}
+
+openai_key = "YOUR OPEN_AI KEY HERE"
+
+victim_ip = "NMAP_TARGET_MACHINE"
