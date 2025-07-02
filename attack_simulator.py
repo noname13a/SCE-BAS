@@ -1,7 +1,5 @@
 import datetime
 import sys
-import os
-import yaml
 import time
 from openai import OpenAI
 import secrets
@@ -101,7 +99,6 @@ def getAbilitiesFromProfile(adversary, abilities):
     return ordered_abilities
 
 def initialize_system():
-# Log system initialization
     log("Initializing system...")
     agents = getAgents()
     show_agents(agents)
@@ -111,45 +108,6 @@ def initialize_system():
     total_abilities = sum(len(getAbilitiesFromProfile(adversary, abilities)) for adversary in adversaries)
     log(f"Number of adversaries: {len(adversaries)}")
     log(f"Total number of abilities from adversaries: {total_abilities}")
-    
-    # Create a folder for YAML files inside the current module directory
-    yaml_folder = os.path.join(os.path.dirname(__file__), "adversaries_yaml")
-    if not os.path.exists(yaml_folder):
-        os.makedirs(yaml_folder)
-    
-    # Clean the directory: remove only existing YAML files
-    for f in os.listdir(yaml_folder):
-        file_path = os.path.join(yaml_folder, f)
-        if os.path.isfile(file_path) and f.endswith(".yaml"):
-            os.remove(file_path)
-    
-    # Function to sanitize file names
-    def sanitize_filename(name):
-        # Remove invalid characters for Windows filenames
-        return re.sub(r'[\\/*?:"<>|\n\r]', "", name)
-    
-    non_skipped_idx = 0  # Initialize the counter for non-skipped adversaries
-    
-    # Generate a YAML file for each adversary with detailed ability information,
-    # except for the adversary named "Everything_Bagel"
-    for adv in adversaries:
-        raw_name = adv.get("name", "adversary").replace(" ", "_")
-        if raw_name == "Everything_Bagel":
-            continue
-        non_skipped_idx += 1
-        adv_data = adv.copy()
-        if "atomic_ordering" in adv:
-            detailed_abilities = []
-            for ability_id in adv["atomic_ordering"]:
-                detailed = getAbilityLocally(abilities, ability_id)
-                detailed_abilities.append(detailed)
-            adv_data["abilities"] = detailed_abilities
-        filename = f"{non_skipped_idx}-{sanitize_filename(raw_name)}.yaml"
-        file_path = os.path.join(yaml_folder, filename)
-        with open(file_path, "w", encoding="utf-8") as f:
-            yaml.dump(adv_data, f, allow_unicode=True)
-    
-    # Update execution state and return agents and adversaries
     update_execution_state()
     return agents, adversaries
 
@@ -176,29 +134,15 @@ def generate_attack_trees(target_scan_output, adversaries, abilities):
     log("Generating attack trees using Target Scan Output...")
     target_profile = target_scan_output
 
-    # Read YAML files from the adversaries_yaml folder in the current module directory.
-    module_dir = os.path.dirname(__file__)
-    yaml_folder = os.path.join(module_dir, "adversaries_yaml")
-    yaml_contents = []
-    if os.path.exists(yaml_folder):
-        for fname in os.listdir(yaml_folder):
-            if fname.endswith(".yaml"):
-                fpath = os.path.join(yaml_folder, fname)
-                with open(fpath, "r", encoding="utf-8") as f:
-                    content = f.read()
-                    yaml_contents.append(content)
-    else:
-        log("YAML folder not found. No adversary data loaded from files.")
 
     prompt = (
         f"Given the following nmap scan output:\n\n{target_profile}\n\n"
-        "And the following adversary profiles (from YAML files):\n\n"
-        + "\n\n".join(yaml_contents) +
-        "\n\nIdentify the adversary profiles (by their 'id') that are most relevant for attacking this target. "
-        "Include only adversary profiles that would let a worm propagate to this machine from another infected machine. "
-        "Return the result as a JSON list of adversary IDs, and only return the list."
+        f"And the following adversary profiles in JSON format:\n\n{json.dumps(adversaries, indent=2)}\n\n"
+        f"Identify the adversary profiles (by their 'id') that are most relevant for attacking this target. "
+        f"Include only adversary profiles that would let a worm propagate to this machine from another infected machine."
+        f"Return the result as a JSON list of adversary IDs, and only return the list."
     )
-    
+
     try:
         client = OpenAI(api_key=secrets.openai_key)
         response = client.responses.create(
@@ -210,8 +154,6 @@ def generate_attack_trees(target_scan_output, adversaries, abilities):
         answer = re.sub("`", "", answer)
         answer = re.sub("json", "", answer)
         selected_ids = json.loads(answer)
-        print("DEBUG: selected profiles")
-        print(selected_ids)
     except Exception as e:
         log(f"Error during LLM adversary matching: {e}")
         selected_ids = []
@@ -233,7 +175,6 @@ def generate_attack_trees(target_scan_output, adversaries, abilities):
                 attack_profiles.append(profile)
         except:
             print("LLM hallucination, skipping this profile")
-            continue
 
     log(f"Attack tree generated with {len(attack_profiles)} branch(es) based on LLM matching.")
     return attack_profiles
@@ -342,16 +283,31 @@ def execute_attack(node, agentId, operation_id):
             requirements.append(match.group(1))
         if(not set(requirements)):
             link_id = executeAbility(operation_id, agentId, ability)
+            print(link_id)
+            if link_id == -50:
+                print("This ability doesnt have an executor for this platform, skipping to the next one")
+                return 0,0
         else:
             print("Proceding to fact selection... Only facts required for this node will be prompted")
             fact = []
-            for factt in getFacts(operation_id)["found"]:
+            facts = getFacts(operation_id)["found"]
+            for factt in facts:
                 if(factt["name"] in set(requirements)):
-                    sel = input("Append: [" + factt["name"] + ", " + factt["value"] + "]? [Y/n]\n")
-                    if("Y" in sel):
+                    counter = 0
+                    for facttt in facts:
+                        if(facttt["name"] in factt["name"]):
+                            counter += 1
+                    if(counter == 1):
+                        print("Only one fact of the type " + factt["name"] + " found, appending automatically")
                         fact.append(factt)
+                    else:
+                        sel = input("Append: [" + factt["name"] + ", " + factt["value"] + "]? [Y/n]\n")
+                        if("Y" in sel):
+                            fact.append(factt)
             link_id = executeAbilityWithFact(operation_id, agentId, ability, fact)
-            
+            if link_id == -50:
+                print("This ability doesnt have an executor for this platform, skipping to the next one")
+                return 0,0
         result = getResult(operation_id, link_id)
         while(result["link"]["status"] == -3):
             time.sleep(2)
