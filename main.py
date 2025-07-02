@@ -29,7 +29,7 @@ def main():
     # Build the semi-automatic attack tree with the generated target scan output.
     log("Starting attack tree generation")
     attack_profiles = generate_attack_trees(target_scan_output, adversaries, getAbilities())
-    attack_profiles = decide_attack_goals(attack_profiles)
+    #attack_profiles = decide_attack_goals(attack_profiles)
     log("Finished attack tree generation")
     
     # Iterate over the attack tree to execute the planned attacks.
