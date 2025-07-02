@@ -246,7 +246,7 @@ def createBlankOperation():
             "name": "ad-hoc"
         },
         "use_learning_parsers": "true",
-        "name": "Manual",
+        "name": "SCE experiment",
         "jitter": "2/8"
     }
     r = requests.post(secrets.url + "api/v2/operations", headers=secrets.auth, json=data)
@@ -265,12 +265,15 @@ def deleteOperation(oper):
         return r.status_code
     
 def executeAbility(oper, agent, ability):
+    executor = ""
     for agen in getAgents():
         if(agent in agen["paw"]):
             ag = agen
     for exe in ability["executors"]:
         if(ag["platform"] in exe["platform"]):
             executor = exe
+    if executor == "":
+        return -50
     data = {
         "ability":{
             "technique_id":ability["technique_id"],
@@ -329,6 +332,7 @@ def getResult(oper, ident):
     
 def executeAbilityWithFact(oper, agent, ability, facts):
     pattern = re.compile(r"#{([a-z\._]+)}")
+    executor = ""
     for agen in getAgents():
         if(agent in agen["paw"]):
             ag = agen
@@ -343,6 +347,8 @@ def executeAbilityWithFact(oper, agent, ability, facts):
             if(match.group(1) in fact["name"]):
                 command = re.sub(match.group(0), fact["value"], command)
 
+    if executor == "":
+        return -50
     data = {
         "ability":{
             "technique_id":ability["technique_id"],
