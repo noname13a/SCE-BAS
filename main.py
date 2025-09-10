@@ -1,60 +1,54 @@
-from attack_simulator import *
+from attack_simulator import generateReport, executeAttackNode, generateAttackTree, updateNodeOutput, updateNodeResult
+from api_calls import getAgents, getAdversaries, createBlankOperation, deleteOperation, deleteFacts, getAbilities
+import sys
+import secrets
+from utils import nmapScan, log
 
 def main():
-    agents, adversaries = initialize_system()
-    selected_agent = None
+    agents = getAgents()
+    adversaries = getAdversaries()
+    selectedAgent = None
     for agent in agents:
         if("Y" in input("Select agent on " + agent["host"] + ", running on " + agent["platform"] + " with address " + str(agent["host_ip_addrs"]) + "? [Y/n]\n")):
-            selected_agent = agent
+            selectedAgent = agent
             break
-    if(selected_agent is None):
+    if(selectedAgent is None):
         print("Must select an agent")
         sys.exit(0)
     
     # The victim machine's IP is obtained from secrets.
-    victim_ip = secrets.victim_ip
+    victimIP = secrets.victimIP
     
     # Create an operation for the nmap scan.
-    status, operation_id = createBlankOperation()
+    status, operationID = createBlankOperation()
     if(status == 400):
-        deleteOperation(operation_id)
-        status, operation_id = createBlankOperation()
+        deleteOperation(operationID)
+        status, operationID = createBlankOperation()
         if(status == 200):
             print("Operation creation error recovered")
             
-    deleteFacts(operation_id)
+    deleteFacts(operationID)
     # Execute nmap on the victim machine to generate the target scan output.
-    target_scan_output = execute_nmap_scan(operation_id, victim_ip)
+    nmapScanOutput = nmapScan(operationID, victimIP)
     
     # Build the semi-automatic attack tree with the generated target scan output.
     log("Starting attack tree generation")
-    attack_profiles = generate_attack_trees(target_scan_output, adversaries, getAbilities())
-    #attack_profiles = decide_attack_goals(attack_profiles)
+    attackTree = generateAttackTree(nmapScanOutput, adversaries, getAbilities())
+    #attackTree = sortAttackTree(attackTree)
     log("Finished attack tree generation")
     
     # Iterate over the attack tree to execute the planned attacks.
-    for profile in attack_profiles:
-        for node in profile.nodes.copy():
-            if node.type.lower() == "attack":
-                update_execution_state(
-                    new_thread=current_thread,
-                    used_agents_param=used_agents,
-                    used_abilities_param=used_abilities,
-                    attack_output=None
-                )
-                
-                attack_output, attack_status = execute_attack(node, selected_agent["paw"], operation_id)
-                save_result(node, attack_status)
-                
-                if(attack_status == 0):
-                    update_tree_with_output(node, attack_output)
-                if(attack_status == 1):
-                    print("Encountered error on branch, skipping to the next one")
-                    break
+    for branch in attackTree:
+        for node in branch.nodes.copy():
+            attackOutput, attackResult = executeAttackNode(node, selectedAgent["paw"], operationID)
+            updateNodeResult(node, attackResult)
+            if(attackResult == 0):
+                updateNodeOutput(node, attackOutput)
+            if(attackResult == 1):
+                print("Encountered error on branch, skipping to the next one")
+                break
         continue
-                    
-    
-    generate_report(attack_profiles)
+    generateReport(attackTree)
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
-from api_calls import *
+from api_calls import getAgents, getAbilities, getAdversaries, deleteAgent, createBlankOperation, getFacts, executeAbility, executeAbilityWithFact, getResult
 
 def main():
     ident = ""
