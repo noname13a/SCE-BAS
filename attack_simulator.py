@@ -298,7 +298,7 @@ def execute_attack(node, agentId, operation_id):
                         if(facttt["name"] in factt["name"]):
                             counter += 1
                     if(counter == 1):
-                        print("Only one fact of the type " + factt["name"] + " found, appending automatically")
+                        print("Only one fact of the type " + factt["name"] + " found, appending automatically...")
                         fact.append(factt)
                     else:
                         sel = input("Append: [" + factt["name"] + ", " + factt["value"] + "]? [Y/n]\n")

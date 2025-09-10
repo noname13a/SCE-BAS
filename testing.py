@@ -3,58 +3,59 @@ from api_calls import *
 def main():
     ident = ""
     while(True):
-        sel = input("\n\nSelecciona una opcion:\n1 - Mostrar agentes\n3 - Mostrar abilities\n4 - Mostrar adversarios\n5 - Crear operacion manual\n6 - Get facts\n7 - Get specific ability\n8 - Ejecutar ability\n9 - Execute ability with fact\n10 - Obtener resultado del ability\n")
+        sel = input("\n\nSelect option to test:\n1 - Show agents\n2 - Delete agent\n3 - Show abilities\n4 - Show adversary profiles\n5 - Create manual operation\n6 - Get facts\n7 - Get specific ability\n8 - Execute fetched ability (option 7)\n9 - Execute fetched ability with fact (option 7)\n10 - Get ability result (options 8 or 9)\n")
         match sel:
             case "1":
                 for agent in getAgents():
-                    print(agent["paw"], agent["platform"])
+                    print("Agent [paw: " + agent["paw"] + ", platform: " + agent["platform"] + "]")
             case "2":
-                print("Agentes:")
+                print("Agents:")
                 for agent in getAgents():
-                    print(agent["paw"])
-                sel = input("ID del agente a eliminar\n")
+                    print("Agent [paw: " + agent["paw"] + ", platform: " + agent["platform"] + "]")
+                sel = input("Agent to delete (paw):\n")
                 deleteAgent(sel)
             case "3":
                 for ability in getAbilities():
-                    print(ability["name"] + ", " + ability["technique_name"])
+                    print("Name: " + ability["name"] + ", technique: " + ability["technique_name"])
             case "4":
                 for adversary in getAdversaries():
-                    print(adversary["name"] + ", " + adversary["adversary_id"])
+                    print("Name: " + adversary["name"] + ", id: " + adversary["adversary_id"])
             case "5":
                 print(createBlankOperation())
                 
             case "6":
-                oper = input("Seleccione la operacion sobre la cual obtener los facts\n")
+                oper = input("Select an operation to fetch facts from(ID)\n")
                 for fact in getFacts(oper)["found"]:
-                    print(fact["name"], fact["value"])
+                    print("Name: " + fact["name"] + ", value: " + fact["value"])
                     
             case "7":
-                search = input("Termino\n")
+                search = input("Term to search for (to use it after, only one should be found, if more than one is found, the lattest will be kept selected):\n")
                 for ab in getAbilities():
                     if(search in ab["name"]):
                         ability = ab
-                        print("One found")
+                        print("Found ability")
                         
             case "8":
-                oper = input("Seleccione la operacion sobre la cual ejecutar el ability\n")
-                agent = input("El agente a utilizar\n")
-                print("La ability es obtenida de la busqueda previa")
+                oper = input("Select the operation to execute the ability in (ID, ability should be fetched from previous search): \n")
+                agent = input("The agent to use:\n")
+                print("The ability was fetched from previous search")
                 ident = executeAbility(oper, agent, ability)
             
             case "9":
-                oper = input("Seleccione la operacion sobre la cual ejecutar el ability\n")
-                agent = input("El agente a utilizar\n")
-                print("La ability es obtenida de la busqueda previa")
+                oper = input("Select the operation to execute the ability in (ID, ability should be fetched from previous search): \n")
+                agent = input("The agent to use: \n")
+                print("The ability was fetched from previous search")
                 fact = []
                 for factt in getFacts(oper)["found"]:
-                    sel = input("Append: [" + factt["name"] + ", " + factt["value"] + "]?")
+                    sel = input("Append: [" + factt["name"] + ", " + factt["value"] + "]? (Y/n): ")
                     if("Y" in sel):
                         fact.append(factt)
                 ident = executeAbilityWithFact(oper, agent, ability, fact)
                 
             case "10":
-                if(getResult(oper, ident) == ""):
-                    print("El resultado no esta listo todavia")
+                result = getResult(oper, ident)
+                if(result["link"]["status"] == -3):
+                    print("Result is not ready yet, try later...")
                 else:
                     print(getResult(oper, ident))
 
