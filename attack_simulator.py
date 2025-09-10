@@ -3,7 +3,7 @@ from openai import OpenAI
 import secrets
 import json
 import base64
-from api_calls import getAdversary, getAbilityLocally, getAbilities, executeAbility, getFacts, executeAbilityWithFact, getResult
+from api_calls import getAdversary, getAbilityLocally, executeAbility, getFacts, executeAbilityWithFact, getResult
 import re
 from utils import log, Node, Branch
 
