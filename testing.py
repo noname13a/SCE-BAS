@@ -33,7 +33,7 @@ def main():
                 for ab in getAbilities():
                     if(search in ab["name"]):
                         ability = ab
-                        print("Found ability")
+                        print("Found ability: [Name: " + ability["name"] + ", technique: " + ability["technique_name"] +"]")
                         
             case "8":
                 oper = input("Select the operation to execute the ability in (ID, ability should be fetched from previous search): \n")
