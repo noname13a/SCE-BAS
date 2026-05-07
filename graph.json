@@ -1,0 +1,140 @@
+{
+    "nodes":[
+        {"identifier":"node0",
+        "title": "Download Macro-Enabled Phishing Attachment",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"142cad8d-19ee-452d-a46d-e4559fa39dae",
+        "connected_to":["node1"
+        ]
+        },
+        {"identifier":"node1",
+        "title": "Collect ARP details",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"85341c8c-4ecb-4579-8f53-43e3e91d7617",
+        "connected_to":["node2"
+        ]
+        },
+        {"identifier":"node2",
+        "title": "Discover system services",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"c6607391-d02c-44b5-9b13-d3492ca58599",
+        "connected_to":["node3"
+        ]
+        },
+        {"identifier":"node3",
+        "title": "Juicy Potato",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"9a4cc90aee89da89e3f907e13140de2c",
+        "connected_to":["node4", "node7", "node8", "node9"
+        ]
+        },
+        {"identifier":"node4",
+        "title": "Scheduled Task Executing Base64 Encoded Commands From Registry",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"469f554b1c5e8613d3ec3662e9d9e3e1",
+        "connected_to":["node5"
+        ]
+        },
+        {"identifier":"node5",
+        "title": "Screen Capture",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"316251ed-6a28-4013-812b-ddf5b5b007f8",
+        "connected_to":["node10", "node11", "node13", "node14", "node15"
+        ]
+        },
+        {"identifier":"node6",
+        "title": "Scheduled Exfiltration",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"110cea7a-5b03-4443-92ee-7ccefaead451",
+        "connected_to":["node16"
+        ]
+        },
+        {"identifier":"node7",
+        "title": "Credentials in Registry - HKCU",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"3aad5312-d48b-4206-9de4-39866c12e60f",
+        "connected_to":["node10", "node11", "node13", "node14", "node15"
+        ]
+        },
+        {"identifier":"node8",
+        "title": "Credentials in Registry - HKLM",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"98e58fc4-3843-4511-89b1-50cb872e0c9b",
+        "connected_to":["node10", "node11", "node13", "node14", "node15"
+        ]
+        },
+        {"identifier":"node9",
+        "title": "List Credential Files via PowerShell",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"1c849fe3ef3770531cd727bc20c98eb3",
+        "connected_to":["node10", "node11", "node13", "node14", "node15"
+        ]
+        },
+        {"identifier":"node10",
+        "title": "Compress Data for Exfiltration With PowerShell",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"8cd2639cb742872b58a2356909628376",
+        "connected_to":["node6", "node12"
+        ]
+        },
+        {"identifier":"node11",
+        "title": "Compress Data for Exfiltration With Rar",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"b42bac313bde7e1641452628af72b915",
+        "connected_to":["node6", "node12"
+        ]
+        },
+        {"identifier":"node12",
+        "title": "Curl Upload File",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"b2f0ed5397bc4f5904648d9a5fda7939",
+        "connected_to":["node16"
+        ]
+        },
+        {"identifier":"node13",
+        "title": "C2 Data Exfiltration",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"72784d12700b219ec134aa42cec5603e",
+        "connected_to":["node16"
+        ]
+        },
+        {"identifier":"node14",
+        "title": "Exfiltration Over Alternative Protocol - ICMP",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"6baab84fe7a52dd5c4ede612fc0d255f",
+        "connected_to":["node16"
+        ]
+        },
+        {"identifier":"node15",
+        "title": "Exfiltration Over Alternative Protocol - HTTP",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"548a620bf3463f72a42937faf7614935",
+        "connected_to":["node16"
+        ]
+        },
+        {"identifier":"node16",
+        "title": "Data exfiltration",
+        "technique":"",
+        "technique_id":"",
+        "caldera_id":"",
+        "connected_to":[
+        ]
+        }
+    ]
+}
